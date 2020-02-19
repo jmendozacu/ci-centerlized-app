@@ -36,7 +36,7 @@ $config['api_urls'] = [
 | a PHP script and you can easily do that on your own.
 |
 */
-$config['base_url'] = 'http://localhost/codeigniter-3';
+$config['base_url'] = 'http://localhost/ci-centerlized-app';
 
 /*
 |--------------------------------------------------------------------------

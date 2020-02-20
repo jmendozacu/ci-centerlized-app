@@ -5,7 +5,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $config['api_urls'] = [
     'registration' => [
         'drupal' => 'https://test-app.free.beeceptor.com/drupal/rest/V1/customers',
-        'magento' => 'https://test-app.free.beeceptor.com/magento/rest/V1/customers',
+        'magento' => 'http://127.0.0.1/magentoce234/rest/V1/customers',
     ],
     'login' => [
         'drupal' => '',

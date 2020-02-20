@@ -92,7 +92,7 @@ class Api_model extends CI_Model
 
         // request for magento
         $options['url'] = $api_urls['registration']['magento'];
-        $magentoResponse = $this->sendRequest($options);
+        echo $magentoResponse = $this->sendRequest($options);
     }
 
     function sendRequest($options){
@@ -102,13 +102,15 @@ class Api_model extends CI_Model
         $method = isset($options['method']) ? $options['method'] : 'GET';
 
         if(in_array($method, ['PUT', 'POST', 'PATCH'])) {
-            $data = ['form_params' => $data];
+            $data = ['json' => $data];
+            $data['headers'] =  [
+                'Content-Type'     => 'application/json',
+            ];
         }
-        
-        
+
+
         if($url != '' && $method != ''){
 
-            
             try {
 
                 # guzzle post request example with form parameter
@@ -123,15 +125,16 @@ class Api_model extends CI_Model
                 #guzzle repose for future use
                 $response = $e->getResponse();
                 $responseBodyAsString = $response->getBody()->getContents();
-                // echo "<hr>";
-                // echo "ERROR HERE : ";
-                // echo "<hr>";
-                print_r($responseBodyAsString);
+                echo "<hr>";
+                echo "ERROR HERE : ";
+                echo "<hr>";
+                pr($response);
+                print_r($responseBodyAsString);die;
                 return $responseBodyAsString;
             }
         }else{
             return false;
         }
     }
-    
+
 }

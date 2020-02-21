@@ -49,56 +49,44 @@ class Api_model extends CI_Model
         echo $res->getStatusCode();
     }
 
-    function login($identity, $password){
+    function login($email, $password){
 
-        // echo $identity;
-        // echo $password;
-
-
-        $options = [
-            'url' => 'https://test-app.free.beeceptor.com/rest/V1/customers',
+        $api_urls = $this->config->item('api_urls');
+        $options = [ 
+            'url' => $api_urls['login']['magento'],
             'method' => 'POST',
-            "data" => [
-                "customer" => [
-                    "email" => "jdoe@example.com",
-                    "firstname" => "Jane",
-                    "lastname" => "Doe",
-                ]
-            ],
         ];
-        echo $response = $this->sendRequest($options);
+        $data = [
+            "email" => $email,
+            "password" => $password
+        ];
+        if($response = $this->sendRequest($data, $options)) {
+            
+        }
     }
 
 
     function register($data){
 
         $api_urls = $this->config->item('api_urls');
+        $drupalOptions = $magentoOptions = [ 'method' => 'POST'];
 
-        $options = [
-            'method' => 'POST',
-            'data' => $data,
-            // "data" => [
-            //     "customer" => [
-            //         "email" => "jdoe@example.com",
-            //         "firstname" => "Jane",
-            //         "lastname" => "Doe",
-            //     ]
-            // ],
-        ];
+        // $drupalOptions['url']   = $api_urls['registration']['drupal'];
+        // $drupalData             = $this->getRegisterationDataFormat('drupal', $data); 
+        $magentoOptions['url']  = $api_urls['registration']['magento'];
+        $magentoData            = $this->getRegisterationDataFormat('magento', $data);
 
-        // request for drupal
-        $options['url'] = $api_urls['registration']['drupal'];
-        $drupalResponse = $this->sendRequest($options);
 
-        // request for magento
-        $options['url'] = $api_urls['registration']['magento'];
-        echo $magentoResponse = $this->sendRequest($options);
+        // $drupalResponse = $this->sendRequest($drupalData, $drupalOptions);
+        return $magentoResponse = $this->sendRequest($magentoData, $magentoOptions);
     }
 
-    function sendRequest($options){
+
+
+
+    function sendRequest($data, $options){
 
         $url = isset($options['url']) ? $options['url'] : '';
-        $data = isset($options['data']) ? $options['data'] : [];
         $method = isset($options['method']) ? $options['method'] : 'GET';
 
         if(in_array($method, ['PUT', 'POST', 'PATCH'])) {
@@ -120,7 +108,8 @@ class Api_model extends CI_Model
                 // echo $response->getReasonPhrase(); // OK
                 // echo $response->getProtocolVersion(); // 1.1
 
-                return $response->getBody();
+                // return $response->getBody();
+                return true;
             } catch (GuzzleHttp\Exception\BadResponseException $e) {
                 #guzzle repose for future use
                 $response = $e->getResponse();
@@ -129,12 +118,45 @@ class Api_model extends CI_Model
                 echo "ERROR HERE : ";
                 echo "<hr>";
                 pr($response);
-                print_r($responseBodyAsString);die;
-                return $responseBodyAsString;
+                print_r($responseBodyAsString);
+                return false;
             }
         }else{
             return false;
         }
     }
 
+    function getRegisterationDataFormat($siteType, $data) {
+
+        switch($siteType) {
+
+            case 'magento':
+                return [
+                    'customer' => [
+                        'firstname' => $data['first_name'],
+                        'lastname' => $data['last_name'],
+                        'email' => $data['email']
+                    ],
+                    'password' => $data['password']
+                ];
+
+            case 'drupal':
+                return [
+                    "name" => [
+                        "value" => $data['email']
+                    ], 
+                    "pass" => [
+                        "value" => $data['last_name']
+                    ], 
+                    "mail" => [
+                        "value" => $data['email']
+                    ], 
+                    "_links" => [
+                        "type"=> [
+                            "href" => base_url("rest/type/user/user")
+                        ]
+                    ] 
+                ];
+        }
+    }
 }

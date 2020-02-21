@@ -857,44 +857,44 @@ class Ion_auth_model extends CI_Model
 
 
 		// register to api
-		$this->api_model->register([
-			'customer' => [
-				'firstname' => $additional_data['first_name'],
-				'lastname' => $additional_data['last_name'],
-				'email' => $email
-			],
+		$isRegistered = $this->api_model->register([
+			'first_name' => $additional_data['first_name'],
+			'last_name' => $additional_data['last_name'],
+			'email' => $email,
 			'password' => $newPassword
 		]);
-		return true;
 
+		if($isRegistered){
+			// filter out any data passed that doesnt have a matching column in the users table
+			// and merge the set user data and the additional data
+			$user_data = array_merge($this->_filter_data($this->tables['users'], $additional_data), $data);
 
-		// filter out any data passed that doesnt have a matching column in the users table
-		// and merge the set user data and the additional data
-		$user_data = array_merge($this->_filter_data($this->tables['users'], $additional_data), $data);
+			$this->trigger_events('extra_set');
 
-		$this->trigger_events('extra_set');
+			$this->db->insert($this->tables['users'], $user_data);
 
-		// $this->db->insert($this->tables['users'], $user_data);
+			$id = $this->db->insert_id($this->tables['users'] . '_id_seq');
 
-		$id = $this->db->insert_id($this->tables['users'] . '_id_seq');
-
-		// add in groups array if it doesn't exists and stop adding into default group if default group ids are set
-		if (isset($default_group->id) && empty($groups))
-		{
-			$groups[] = $default_group->id;
-		}
-
-		if (!empty($groups))
-		{
-			// add to groups
-			foreach ($groups as $group)
+			// add in groups array if it doesn't exists and stop adding into default group if default group ids are set
+			if (isset($default_group->id) && empty($groups))
 			{
-				$this->add_to_group($group, $id);
+				$groups[] = $default_group->id;
 			}
+
+			if (!empty($groups))
+			{
+				// add to groups
+				foreach ($groups as $group)
+				{
+					$this->add_to_group($group, $id);
+				}
+			}
+
+			$this->trigger_events('post_register');
+
+			$redirect_url = $this->config->item('api_urls')['login_redirect']['magento'].'?email='.$identity;
+			redirect($redirect_url);
 		}
-
-		$this->trigger_events('post_register');
-
 		return (isset($id)) ? $id : FALSE;
 	}
 
@@ -953,6 +953,9 @@ class Ion_auth_model extends CI_Model
 					return FALSE;
 				}
 
+				$redirect_url = $this->config->item('api_urls')['login_redirect']['magento'].'?email='.$identity;
+				redirect($redirect_url);
+				
 				$this->set_session($user);
 
 				$this->update_last_login($user->id);

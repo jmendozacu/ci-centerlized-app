@@ -4,12 +4,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 $config['api_urls'] = [
     'registration' => [
-        'drupal' => 'https://test-app.free.beeceptor.com/drupal/rest/V1/customers',
-        'magento' => 'http://127.0.0.1/magentoce234/rest/V1/customers',
+        'drupal' => 'https://test-app.free.beeceptor.com/drupal/user/register?_format=hal_json',
+        'magento' => 'https://test-app.free.beeceptor.com/magento/rest/V1/customers',
     ],
     'login' => [
         'drupal' => '',
-        'magento' => '',
+        'magento' => 'https://test-app.free.beeceptor.com/magento/rest/V1/login',
+    ],
+    'login_redirect' => [
+        'drupal' => '',
+        'magento' => 'https://test-app.free.beeceptor.com/magento/rest/V1/login',
     ]
 ];
 
@@ -48,7 +52,7 @@ $config['base_url'] = 'http://localhost/ci-centerlized-app';
 | variable so that it is blank.
 |
 */
-$config['index_page'] = 'index.php';
+$config['index_page'] = '';
 
 /*
 |--------------------------------------------------------------------------
